@@ -1,0 +1,36 @@
+# Versión de Docker Compose
+version: '3'
+
+services:
+  # Servicio del servidor SMTP (MailHog)
+  smtp:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - mail_network
+
+  # Servicio de la aplicación web
+  web:
+    build: ./web
+    ports:
+      - "5000:5000"
+    depends_on:
+      - smtp
+    networks:
+      - mail_network
+    environment:
+      - SMTP_HOST=smtp
+      - SMTP_PORT=1025
+    volumes:
+      - ./web:/app
+
+# Definición de la red interna
+networks:
+  mail_network:
+    driver: bridge 
+
+volumes:
+  maildata:  # Volumen para almacenar correos 
+    driver: local 
